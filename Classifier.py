@@ -43,9 +43,9 @@ class Classifier:
 
     def __init__(self):
         
-        self.path = "./train_data/"
+        self.path = "./dataset/train_data/"
         train_ds = tf.data.Dataset.from_generator(self.data_generator, (tf.float32, tf.uint8))
-        self.path = "./test_data/"
+        self.path = "./dataset/test_data/"
         test_ds = tf.data.Dataset.from_generator(self.data_generator, (tf.float32, tf.uint8))
 
         train_dataset = train_ds.apply(self.prepare_digit_data)
