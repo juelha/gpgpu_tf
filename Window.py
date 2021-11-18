@@ -58,7 +58,7 @@ class Window(tk.Frame):
         self.canvas_field.grid(row=0,column=0)
 
         self.plotbutton = tk.Button(master=master, text="Clear", command=self.click_button_eraseAll)
-        self.plotbutton.grid(row=2,column=0)
+        self.plotbutton.grid(row=1,column=0)
 
         self.classify_thread = threading.Thread(target=self.classify)
         self.classify_thread.setDaemon(True)
