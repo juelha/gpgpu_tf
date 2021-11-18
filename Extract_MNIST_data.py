@@ -11,11 +11,11 @@ import os
 
 def main():
 
-    train_path = "./train_data/"
+    train_path = "dataset/train_data/"
     if not os.path.exists(train_path):
         os.makedirs(train_path)
 
-    test_path = "./test_data/"
+    test_path = "dataset/test_data/"
     if not os.path.exists(test_path):
         os.makedirs(test_path)
 
