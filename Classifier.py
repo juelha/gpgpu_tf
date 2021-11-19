@@ -10,6 +10,18 @@ import os
 
 class Classifier:
 
+
+    def __init__(self, model=None, train_ds=None, test_ds=None):
+        """
+        
+        """
+        #self.model = model
+        
+        self.model = MyModel(dim_hidden=(2,511),perceptrons_out=10)
+
+        self.train(num_epochs=30, learning_rate=0.01)
+        
+
     def data_generator(self):
 
         files = os.listdir(self.path)
@@ -25,7 +37,7 @@ class Classifier:
             yield data, label
 
 
-    def prepare_digit_data(self, digit):
+    def pipeline(self, digit):
         #flatten the images into vectors
         digit = digit.map(lambda img, target: (tf.reshape(img, (-1,)), target))
         #create one-hot targets
@@ -42,67 +54,8 @@ class Classifier:
         #return preprocessed dataset
         return digit
 
-
-    def __init__(self):
-        
-        self.path = "./dataset/train_data/"
-        train_ds = tf.data.Dataset.from_generator(self.data_generator, (tf.float32, tf.uint8))
-        self.path = "./dataset/test_data/"
-        test_ds = tf.data.Dataset.from_generator(self.data_generator, (tf.float32, tf.uint8))
-
-        train_dataset = train_ds.apply(self.prepare_digit_data)
-        test_dataset = test_ds.apply(self.prepare_digit_data)
-
-        #train_dataset = train_dataset.take(1350)
-        #test_dataset = test_dataset.take(180)
-
-        # #
-        # ### Hyperparameters
-        num_epochs = 30
-        learning_rate = 0.01
-
-        # Initialize the model.
-        self.model = MyModel()
-        # Initialize the loss: categorical cross entropy. Check out 'tf.keras.losses'.
-        cross_entropy_loss = tf.keras.losses.CategoricalCrossentropy()
-        # Initialize the optimizer: SGD with default parameters. Check out 'tf.keras.optimizers'
-        optimizer = tf.keras.optimizers.Adam(learning_rate)
-
-        # Initialize lists for later visualization.
-        train_losses = []
-
-        test_losses = []
-        test_accuracies = []
-
-        #testing once before we begin
-        test_loss, test_accuracy = test(self.model, test_dataset, cross_entropy_loss)
-        test_losses.append(test_loss)
-        test_accuracies.append(test_accuracy)
-
-
-        # #check how model performs on train data once before we begin
-        train_loss, _ = test(self.model, train_dataset, cross_entropy_loss)
-        train_losses.append(train_loss)
-        #
-        # We train for num_epochs epochs.
-        for epoch in range(num_epochs):
-            print(f'Epoch: {str(epoch)} starting with accuracy {test_accuracies[-1]}')
-
-            #training (and checking in with training)
-            epoch_loss_agg = []
-            for input,target in train_dataset:
-                train_loss = train_step(self.model, input, target, cross_entropy_loss, optimizer)
-                epoch_loss_agg.append(train_loss)
-
-            #track training loss
-            train_losses.append(tf.reduce_mean(epoch_loss_agg))
-
-            #testing, so we can track accuracy and test loss
-            test_loss, test_accuracy = test(self.model, test_dataset, cross_entropy_loss)
-            test_losses.append(test_loss)
-            test_accuracies.append(test_accuracy)
-
-         # Plot results
+    def visualize(self,train_losses,test_losses,test_accuracies):
+        # Plot results
         plt.suptitle("Accuracy and loss for training and test data")
         x = np.arange(0, len(train_losses))
 
@@ -134,3 +87,37 @@ class Classifier:
         #print(data.shape)
         prediction = self.model(data)
         return prediction
+
+
+
+    def train(self, num_epochs, learning_rate):
+        
+        # get data
+        self.path = "./dataset/train_data/"
+        train_ds = tf.data.Dataset.from_generator(self.data_generator, (tf.float32, tf.uint8))
+        self.path = "./dataset/test_data/"
+        test_ds = tf.data.Dataset.from_generator(self.data_generator, (tf.float32, tf.uint8))
+
+
+        # preprocessing & preparing of data
+        train_dataset = train_ds.apply(self.pipeline)
+        test_dataset = test_ds.apply(self.pipeline)
+
+
+        tf.keras.backend.clear_session()
+
+        # Initialize the model 
+       # self.model = MyModel(dim_hidden=(2,511),perceptrons_out=10)
+
+        # Train the model
+        self.model.training_loop(train_dataset,test_dataset, num_epochs, learning_rate)
+
+
+
+
+## testing ##
+#myclassifier = Classifier(MyModel(dim_hidden=(2,511),perceptrons_out=10))
+
+#myclassifier.train(num_epochs=30, learning_rate=0.01)
+
+

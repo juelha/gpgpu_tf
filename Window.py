@@ -25,7 +25,7 @@ class Window(tk.Frame):
 
     def createWidgets(self, master):
         
-        self.classifier = Classifier()
+        self.classifier = Classifier() 
         
         # Plot
         fig = plt.figure(figsize=(4,4))
